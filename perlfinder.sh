@@ -1,9 +1,18 @@
 #!/bin/bash
 
-# Find files with the .pl extension
-find / -name "*.pl" -type f
+# Set the internal field separator to newline
+IFS=$'\n'
 
-# Search for common Perl backdoor patterns
-grep -Ril "eval *( *base64_decode" /
-grep -Ril "perl -MIO -e" /
-grep -Ril "perl -e 'use Socket'" /
+# Find all files with the .pl extension
+files=$(find / -name "*.pl" -type f)
+
+# Loop through the files
+for file in $files; do
+  # Check for common Perl backdoor patterns
+  if grep -q "eval *( *base64_decode" "$file" ||
+     grep -q "perl -MIO -e" "$file" ||
+     grep -q "perl -e 'use Socket'" "$file"; then
+    # Print the filename and path of any potential backdoors
+    echo "$file"
+  fi
+done
